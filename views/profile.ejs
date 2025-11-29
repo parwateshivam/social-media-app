@@ -1,0 +1,86 @@
+<%- include("partials/header") %>
+
+  <section id="profile-section" class="w-full min-h-screen bg-zinc-900 text-white p-5">
+
+    <div class="header-container flex justify-between items-center">
+      <span class="text-2xl font-bold">
+        <%= user.name %>
+      </span>
+      <a href="/logout" class="bg-red-600 px-3 py-1 rounded hover:bg-red-400" type="button">Log Out</a>
+    </div>
+
+    <!-- TOP SECTION -->
+    <div id="upper" class="mt-10 w-full flex flex-col justify-center items-center h-[50%] gap-5">
+
+      <!-- PROFILE PICTURE -->
+      <div
+        class="border-4 border-zinc-700 h-28 w-28 rounded-full overflow-hidden shadow-lg flex items-center justify-center">
+        <% if (user.profilePic) { %>
+          <img class="h-full w-full object-cover" src="/uploads/<%= user.profilePic %>" alt="">
+          <% } else { %>
+            <img class="h-full w-full object-cover" src="../public/images.png" alt="">
+            <% } %>
+      </div>
+
+      <form action="/upload-profile" method="POST" enctype="multipart/form-data">
+        <label class="bg-blue-500 px-3 py-1 rounded cursor-pointer">
+          Update Profile Pic
+          <input type="file" name="profilePic" class="hidden" onchange="this.form.submit()">
+        </label>
+      </form>
+
+      <!-- NAME + BIO -->
+      <div class="text-center">
+        <h2 class="text-2xl font-semibold">
+          <%= user.username %>
+        </h2>
+        <p class="text-zinc-400">
+          <%= user.bio %>
+        </p>
+      </div>
+
+      <!-- STATS -->
+      <div class="flex gap-8 text-center">
+        <div>
+          <span class="text-xl font-bold block">
+            <%= user.posts.length %>
+          </span>
+          <span class="text-sm text-zinc-400">Posts</span>
+        </div>
+        <div>
+          <span class="text-xl font-bold block">
+            <%= user.followeres.length %>
+          </span>
+          <span class="text-sm text-zinc-400">Followers</span>
+        </div>
+        <div>
+          <span class="text-xl font-bold block">
+            <%= user.following.length %>
+          </span>
+          <span class="text-sm text-zinc-400">Following</span>
+        </div>
+      </div>
+
+      <!-- EDIT PROFILE BUTTON -->
+      <a href="/edit-profile" class="px-5 py-2 bg-blue-500 rounded-lg text-white hover:bg-blue-600 transition">
+        Edit Profile
+      </a>
+
+    </div>
+
+    <!-- LOWER SECTION (POST GRID) -->
+    <div id="lower" class="mt-6 grid grid-cols-3 gap-2 p-2">
+
+      <!-- Example posts -->
+      <div class="h-32 bg-zinc-700 rounded"></div>
+      <div class="h-32 bg-zinc-700 rounded"></div>
+      <div class="h-32 bg-zinc-700 rounded"></div>
+      <div class="h-32 bg-zinc-700 rounded"></div>
+      <div class="h-32 bg-zinc-700 rounded"></div>
+      <div class="h-32 bg-zinc-700 rounded"></div>
+
+    </div>
+
+  </section>
+
+  <%- include("partials/footer") %>
