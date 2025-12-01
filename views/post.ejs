@@ -1,0 +1,37 @@
+<%- include("partials/header") %>
+
+  <div class="min-h-screen flex items-center justify-center bg-zinc-900 p-4">
+
+    <!-- Card -->
+    <div class="w-full max-w-md bg-zinc-800 shadow-xl rounded-xl p-6 border border-zinc-700">
+      <h2 class="text-2xl font-bold mb-6 text-center text-zinc-100">Create a Post</h2>
+
+      <!-- FORM -->
+      <form action="/create-post-submit" method="POST" enctype="multipart/form-data" class="space-y-5">
+
+        <!-- IMAGE UPLOAD -->
+        <div>
+          <label class="block mb-2 font-medium text-zinc-200">Upload Image</label>
+          <input type="file" name="postImage" accept="image/*" required
+            class="w-full bg-zinc-900 text-zinc-100 border border-zinc-600 rounded-lg p-2 file:bg-zinc-700 file:text-zinc-200 file:border-none file:px-3 file:py-1 file:rounded-md file:cursor-pointer" />
+        </div>
+
+        <!-- CAPTION -->
+        <div>
+          <label class="block mb-2 font-medium text-zinc-200">Caption</label>
+          <textarea name="caption" rows="3" placeholder="Write something..."
+            class="w-full bg-zinc-900 text-zinc-100 border border-zinc-600 rounded-lg p-3 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required></textarea>
+        </div>
+
+        <!-- SUBMIT -->
+        <button type="submit"
+          class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium">
+          Post
+        </button>
+
+      </form>
+    </div>
+  </div>
+
+  <%- include("partials/footer") %>

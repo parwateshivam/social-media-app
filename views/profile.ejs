@@ -83,4 +83,18 @@
 
   </section>
 
+  <footer class="p-3 bg-zinc-700 text-white flex justify-between items-center fixed bottom-0 w-full">
+    <a href="/feed">
+      <i class="fa-solid fa-house text-xl"></i>
+    </a>
+    <a href="/create-post">
+      <i class="fa-solid fa-plus text-xl"></i>
+    </a>
+    <a href="/profile">
+      <div class="h-8 w-8 rounded-full overflow-hidden">
+        <img class="h-full w-full object-cover" src="../uploads/<%= user.profilePic %>" alt="">
+      </div>
+    </a>
+  </footer>
+
   <%- include("partials/footer") %>

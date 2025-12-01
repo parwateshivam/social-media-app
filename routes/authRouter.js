@@ -8,6 +8,7 @@ import {
 } from '../controllers/authController.js'
 import { upload } from '../config/multerConfig.js'
 import { userModel } from '../models/userSchema.js'
+import { isLoggedIn } from '../middlewares/isLoggedIn.js'
 
 const authRouter = express.Router()
 
@@ -32,14 +33,8 @@ authRouter.get("/profile", isLoggedIn, (req, res) => {
   res.render("profile.ejs", { user: req.user });
 });
 
-// Middleware to protect routes
-function isLoggedIn(req, res, next) {
-  if (req.isAuthenticated()) return next();
-  res.redirect("/login");
-}
 
 // upload user profile picture
-
 authRouter.post('/upload-profile', isLoggedIn, upload.single('profilePic'), handleProfileUpload)
 
 authRouter.get('/edit-profile', isLoggedIn, (req, res) => {

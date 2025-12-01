@@ -5,12 +5,14 @@ const postSchema = mongoose.Schema({
     type: String,
     default: ""
   },
-  createdBy: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users"
-    }
-  ],
+  caption: {
+    type: String,
+    default: ""
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users"
+  },
   createdAt: {
     type: Date,
     default: Date.now

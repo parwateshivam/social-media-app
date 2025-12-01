@@ -5,6 +5,7 @@ import passport from "passport";
 import { connectDB } from './config/db.js';
 import passportConfig from "./config/passportConfig.js";
 import { authRouter } from './routes/authRouter.js';
+import { postRouter } from './routes/postRouter.js';
 
 dotenv.config({ path: './config.env' });
 
@@ -39,6 +40,7 @@ app.get('/', (req, res) => {
 
 // ROUTES
 app.use(authRouter);
+app.use(postRouter)
 
 let PORT = process.env.PORT || 7002;
 app.listen(PORT, () => {
