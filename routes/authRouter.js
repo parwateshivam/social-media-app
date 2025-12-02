@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { json } from 'express'
 import {
   handleLogin,
   handleRegister,
@@ -29,8 +29,9 @@ authRouter.get("/logout", (req, res, next) => {
 });
 
 // PROTECTED ROUTE INSIDE THIS FILE OR OUTSIDE
-authRouter.get("/profile", isLoggedIn, (req, res) => {
-  res.render("profile.ejs", { user: req.user });
+authRouter.get("/profile", isLoggedIn, async (req, res) => {
+  let user = await userModel.findOne({ _id: req.user._id }).populate("posts")
+  res.render("profile.ejs", { user });
 });
 
 

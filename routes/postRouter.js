@@ -24,4 +24,42 @@ postRouter.get('/create-post', isLoggedIn, (req, res) => {
 
 postRouter.post('/create-post-submit', isLoggedIn, upload.single("postImage"), handlePostCreateSubmit)
 
+postRouter.post('/like/:id', isLoggedIn, async (req, res) => {
+  try {
+    let post = await postModel.findOne({ _id: req.params.id });
+
+    // If post not found
+    if (!post) return res.redirect('/feed');
+
+    // Convert userId to string for comparison
+    const userId = req.user._id.toString();
+
+    // Check if already liked
+    if (post.likes.includes(userId)) {
+      console.log("Already liked → Removing like");
+      post.likes.pull(userId);   // remove like
+    } else {
+      console.log("Not liked yet → Adding like");
+      post.likes.push(userId);   // add like
+    }
+
+    await post.save();
+
+    return res.redirect('/feed');
+
+  } catch (err) {
+    console.log(err);
+    return res.redirect('/feed');
+  }
+});
+
+postRouter.post('/follow/:id', isLoggedIn, async (req, res) => {
+  try {
+    console.log(req.params.id)
+    res.redirect('/feed')
+  } catch (err) {
+    console.log(err)
+  }
+})
+
 export { postRouter }

@@ -4,6 +4,7 @@
 
     <!-- STORIES -->
     <div class="story-container w-full flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
+
       <% usersArray.forEach((user)=> { %>
         <div class="flex flex-col items-center cursor-pointer">
           <div
@@ -15,11 +16,13 @@
           </p>
         </div>
         <% }) %>
+
     </div>
 
     <!-- POSTS -->
     <div class="post-container flex flex-col gap-6 mt-6">
       <% posts.forEach((post)=> { %>
+
         <div class="w-full bg-zinc-800 rounded-xl shadow-xl overflow-hidden">
 
           <!-- Post Image -->
@@ -27,7 +30,7 @@
             <img class="w-full h-full object-cover" src="/uploads/<%= post.postPic %>" alt="">
           </div>
 
-          <!-- Post Caption -->
+          <!-- User + Caption -->
           <div class="p-4">
             <p class="text-sm text-gray-300">
               <span class="font-semibold text-white">
@@ -36,7 +39,57 @@
               <%= post.caption %>
             </p>
           </div>
+
+          <!-- ACTION BUTTONS -->
+          <div class="px-4 py-3 border-t border-zinc-700 flex items-center justify-between text-gray-300">
+
+            <!-- LIKE -->
+            <form action="/like/<%= post._id %>" method="POST">
+              <button class="flex items-center gap-2 hover:text-white transition">
+                <!-- Heart Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 
+                   7.636l1.318-1.318a4.5 4.5 
+                   0 116.364 6.364L12 21.364 4.318 
+                   12.682a4.5 4.5 0 010-6.364z" />
+                </svg>
+                <span>
+                  <%= post.likes.length %>
+                </span>
+              </button>
+            </form>
+
+            <!-- FOLLOW -->
+            <form action="/follow/<%= user._id %>" method="POST">
+              <button class="flex items-center gap-2 hover:text-white transition">
+                <!-- Plus Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Follow</span>
+              </button>
+            </form>
+
+            <!-- COMMENT -->
+            <a href="/post/<%= post._id %>/comments" class="flex items-center gap-2 hover:text-white transition">
+              <!-- Comment Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 
+                 12c0 4.418-4.03 8-9 8a9.86 
+                 9.86 0 01-3.5-.6L3 21l1.6-4.3A8.3 
+                 8.3 0 013 12c0-4.418 4.03-8 9-8s9 
+                 3.582 9 8z" />
+              </svg>
+              <span>Comment</span>
+            </a>
+
+          </div>
+
         </div>
+
         <% }) %>
     </div>
 

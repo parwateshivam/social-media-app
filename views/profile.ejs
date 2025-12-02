@@ -18,7 +18,7 @@
         <% if (user.profilePic) { %>
           <img class="h-full w-full object-cover" src="/uploads/<%= user.profilePic %>" alt="">
           <% } else { %>
-            <img class="h-full w-full object-cover" src="../public/images.png" alt="">
+            <img class="h-full w-full object-cover" src="../public/profile.jpg" alt="">
             <% } %>
       </div>
 
@@ -70,15 +70,11 @@
 
     <!-- LOWER SECTION (POST GRID) -->
     <div id="lower" class="mt-6 grid grid-cols-3 gap-2 p-2">
-
-      <!-- Example posts -->
-      <div class="h-32 bg-zinc-700 rounded"></div>
-      <div class="h-32 bg-zinc-700 rounded"></div>
-      <div class="h-32 bg-zinc-700 rounded"></div>
-      <div class="h-32 bg-zinc-700 rounded"></div>
-      <div class="h-32 bg-zinc-700 rounded"></div>
-      <div class="h-32 bg-zinc-700 rounded"></div>
-
+      <% user.posts.forEach((post)=> { %>
+        <div class="h-32 rounded overflow-hidden">
+          <img class="w-full h-full object-cover" src="../uploads/<%= post.postPic %>" alt="">
+        </div>
+        <% }) %>
     </div>
 
   </section>
