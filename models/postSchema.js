@@ -22,6 +22,16 @@ const postSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "users"
     }
+  ],
+  comments: [
+    {
+      comment: String,
+      doneBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users'
+      },
+      createdAt: Date
+    }
   ]
 })
 

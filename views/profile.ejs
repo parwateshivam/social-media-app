@@ -69,17 +69,33 @@
     </div>
 
     <!-- LOWER SECTION (POST GRID) -->
-    <div id="lower" class="mt-6 grid grid-cols-3 gap-2 p-2">
+    <div id="lower" class="mt-6 grid grid-cols-3 gap-2 p-2 mb-10">
+
       <% user.posts.forEach((post)=> { %>
-        <div class="h-32 rounded overflow-hidden">
-          <img class="w-full h-full object-cover" src="../uploads/<%= post.postPic %>" alt="">
+
+        <div class="relative group h-40 rounded overflow-hidden">
+
+          <!-- POST IMAGE -->
+          <img class="w-full h-full object-cover" src="/uploads/<%= post.postPic %>" alt="">
+
+          <!-- DELETE BUTTON (SHOWS ON HOVER) -->
+          <form action="/delete-post/<%= post._id %>" method="POST"
+            class="absolute top-0 right-0">
+
+            <button class="h-8 w-8 bg-red-600 rounded-full flex items-center justify-center">
+              <i class="fa-solid fa-xmark text-white"></i>
+            </button>
+
+          </form>
+
         </div>
+
         <% }) %>
     </div>
 
   </section>
 
-  <footer class="p-3 bg-zinc-700 text-white flex justify-between items-center fixed bottom-0 w-full">
+  <footer class="px-5 py-1 bg-zinc-700 text-white flex justify-between items-center fixed bottom-0 w-full">
     <a href="/feed">
       <i class="fa-solid fa-house text-xl"></i>
     </a>

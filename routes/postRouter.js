@@ -24,6 +24,20 @@ postRouter.get('/create-post', isLoggedIn, (req, res) => {
 
 postRouter.post('/create-post-submit', isLoggedIn, upload.single("postImage"), handlePostCreateSubmit)
 
+postRouter.post('/delete-post/:postId', isLoggedIn, async (req, res) => {
+  try {
+    await postModel.findByIdAndDelete(req.params.postId);
+    await userModel.findByIdAndUpdate(
+      req.user._id,
+      { $pull: { posts: req.params.postId } }
+    )
+    res.redirect('/profile');
+  } catch (err) {
+    console.log(err);
+    res.redirect('/profile');
+  }
+});
+
 postRouter.post('/like/:id', isLoggedIn, async (req, res) => {
   try {
     let post = await postModel.findOne({ _id: req.params.id });
@@ -53,13 +67,76 @@ postRouter.post('/like/:id', isLoggedIn, async (req, res) => {
   }
 });
 
-postRouter.post('/follow/:id', isLoggedIn, async (req, res) => {
+postRouter.post('/toggle-follow/:id', isLoggedIn, async (req, res) => {
   try {
-    console.log(req.params.id)
+    let loginUserId = req.user._id
+    let targetUserId = req.params.id
+
+    let loginUser = await userModel.findById(loginUserId)
+
+    const isFollowing = loginUser.following.includes(targetUserId)
+
+    if (isFollowing) {
+      // UNFOLLOW
+      await userModel.findByIdAndUpdate(
+        loginUserId,
+        { $pull: { following: targetUserId } }
+      )
+
+      await userModel.findByIdAndUpdate(
+        targetUserId,
+        { $pull: { followeres: loginUserId } }
+      )
+    } else {
+      // FOLLOW
+      await userModel.findByIdAndUpdate(
+        loginUserId,
+        { $addToSet: { following: targetUserId } }
+      )
+
+      await userModel.findByIdAndUpdate(
+        targetUserId,
+        { $addToSet: { followeres: loginUserId } }
+      )
+    }
+
     res.redirect('/feed')
+
   } catch (err) {
     console.log(err)
+    res.redirect('/feed')
   }
 })
+
+postRouter.get('/comment/:id', isLoggedIn, (req, res) => {
+  let postId = req.params.id
+  res.render("comment", { postId })
+})
+
+postRouter.post('/comment-submit/:postId', isLoggedIn, async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const userId = req.user._id;
+    const { comment } = req.body;
+
+    await postModel.findByIdAndUpdate(
+      postId,
+      {
+        $push: {
+          comments: {
+            comment: comment,
+            doneBy: userId,
+            createdAt: new Date()
+          }
+        }
+      }
+    );
+
+    res.redirect('/feed');
+  } catch (err) {
+    console.log(err);
+    res.redirect('/feed');
+  }
+});
 
 export { postRouter }

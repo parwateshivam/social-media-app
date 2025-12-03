@@ -1,0 +1,16 @@
+<%- include("partials/header") %>
+
+  <div class="w-full min-h-screen bg-zinc-900 text-white py-5 flex flex-col items-center justify-center">
+    <div class="flex flex-col items-center gap-5 px-4 justify-center">
+      <form class="w-full" action="/comment-submit/<%= postId %>" method="post">
+        <input class="px-3 mt-2 py-2 border-2 border-zinc-800 rounded-md block w-full bg-zinc-900" type="text"
+          placeholder="Comment here..." name="comment">
+
+        <button type="submit" class="py-1 px-3 bg-blue-500 rounded text-white">
+          Add comment
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <%- include("partials/footer") %>
