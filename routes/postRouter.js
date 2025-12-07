@@ -4,6 +4,7 @@ import { upload } from '../config/multerConfig.js'
 import { handlePostCreateSubmit } from '../controllers/postController.js'
 import { postModel } from '../models/postSchema.js'
 import { userModel } from '../models/userSchema.js'
+import { io } from '../index.js'
 
 const postRouter = express.Router()
 
@@ -40,24 +41,31 @@ postRouter.post('/delete-post/:postId', isLoggedIn, async (req, res) => {
 
 postRouter.post('/like/:id', isLoggedIn, async (req, res) => {
   try {
-    let post = await postModel.findOne({ _id: req.params.id });
+    let post = await postModel
+      .findOne({ _id: req.params.id })
+      .populate("createdBy");
 
-    // If post not found
     if (!post) return res.redirect('/feed');
 
-    // Convert userId to string for comparison
     const userId = req.user._id.toString();
+    const postOwnerId = post.createdBy._id.toString();
 
-    // Check if already liked
     if (post.likes.includes(userId)) {
       console.log("Already liked → Removing like");
-      post.likes.pull(userId);   // remove like
+      post.likes.pull(userId);
     } else {
       console.log("Not liked yet → Adding like");
-      post.likes.push(userId);   // add like
+      post.likes.push(userId);
     }
 
     await post.save();
+
+    // Send real-time notification only to post owner
+    if (postOwnerId !== userId) {
+      io.to(postOwnerId).emit("like-notification",
+        `${req.user.username} likes your post`
+      );
+    }
 
     return res.redirect('/feed');
 
@@ -67,46 +75,6 @@ postRouter.post('/like/:id', isLoggedIn, async (req, res) => {
   }
 });
 
-postRouter.post('/toggle-follow/:id', isLoggedIn, async (req, res) => {
-  try {
-    let loginUserId = req.user._id
-    let targetUserId = req.params.id
-
-    let loginUser = await userModel.findById(loginUserId)
-
-    const isFollowing = loginUser.following.includes(targetUserId)
-
-    if (isFollowing) {
-      // UNFOLLOW
-      await userModel.findByIdAndUpdate(
-        loginUserId,
-        { $pull: { following: targetUserId } }
-      )
-
-      await userModel.findByIdAndUpdate(
-        targetUserId,
-        { $pull: { followeres: loginUserId } }
-      )
-    } else {
-      // FOLLOW
-      await userModel.findByIdAndUpdate(
-        loginUserId,
-        { $addToSet: { following: targetUserId } }
-      )
-
-      await userModel.findByIdAndUpdate(
-        targetUserId,
-        { $addToSet: { followeres: loginUserId } }
-      )
-    }
-
-    res.redirect('/feed')
-
-  } catch (err) {
-    console.log(err)
-    res.redirect('/feed')
-  }
-})
 
 postRouter.get('/comment/:id', isLoggedIn, (req, res) => {
   let postId = req.params.id
@@ -118,6 +86,9 @@ postRouter.post('/comment-submit/:postId', isLoggedIn, async (req, res) => {
     const postId = req.params.postId;
     const userId = req.user._id;
     const { comment } = req.body;
+
+    let post = await postModel.findById(postId)
+    let postOwnerId = post.createdBy.toString()
 
     await postModel.findByIdAndUpdate(
       postId,
@@ -131,6 +102,8 @@ postRouter.post('/comment-submit/:postId', isLoggedIn, async (req, res) => {
         }
       }
     );
+
+    io.to(postOwnerId).emit('comment-notification', `${req.user.username} has comments on your post`)
 
     res.redirect('/feed');
   } catch (err) {

@@ -1,6 +1,29 @@
-<%- include("partials/header") %>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>feed page</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <script src="https://unpkg.com/@heroicons/vue@2.1.4/24/outline/index.js"></script>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+</head>
+
+<body>
 
   <section id="feed-section" class="bg-zinc-900 w-full min-h-screen text-white p-5">
+
+    <div id="notification-container" class="hidden fixed top-5 left-1/2 -translate-x-1/2 
+    bg-green-600 px-4 py-2 rounded-lg shadow-lg text-white text-sm transition-all duration-300">
+      <p id="notification"></p>
+    </div>
 
     <!-- STORIES -->
     <div class="story-container w-full flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
@@ -61,12 +84,18 @@
             </form>
 
             <!-- FOLLOW -->
-            <form action="/toggle-follow/<%= post.createdBy._id %>" method="POST">
+            <form action="/follow-request/<%= post.createdBy._id %>" method="POST">
+
               <% if (user.following.includes(post.createdBy._id)) { %>
-                <button class="bg-zinc-700 px-4 py-1 rounded text-white">Following</button>
-                <% } else { %>
-                  <button class="bg-blue-600 px-4 py-1 rounded text-white">Follow</button>
-                  <% } %>
+                <button class="bg-gray-700 px-4 py-1 rounded">Following</button>
+
+                <% } else if (user.sentRequests.includes(post.createdBy._id)) { %>
+                  <button class="bg-yellow-500 px-4 py-1 rounded">Requested</button>
+
+                  <% } else { %>
+                    <button class="bg-blue-600 px-4 py-1 rounded">Follow</button>
+
+                    <% } %>
             </form>
 
             <!-- COMMENT -->
@@ -85,6 +114,19 @@
 
           </div>
 
+          <div class="p-4 border-t border-zinc-700 w-full">
+            <button id="comment-container-btn" class="text-blue-400">
+              View comments
+            </button>
+            <div id="comment-container" class="flex flex-col w-full h-0 overflow-hidden gap-1 p-1">
+              <% post.comments.forEach((c)=> { %>
+                <span>
+                  <%= c.comment %>
+                </span>
+                <% }) %>
+            </div>
+          </div>
+
         </div>
 
         <% }) %>
@@ -92,20 +134,83 @@
 
   </section>
 
-  <footer class="py-1 px-5 bg-zinc-700 text-white flex justify-between items-center fixed bottom-0 w-full">
-    <a href="/feed">
-      <i class="fa-solid fa-house text-xl"></i>
+  <!-- BOTTOM NAVBAR -->
+  <footer class="px-8 py-2 bg-zinc-950 text-white flex justify-between items-center fixed bottom-0 w-full">
+
+    <a href="/feed" class="hover:text-blue-400">
+      <i class="fa-solid fa-house text-2xl"></i>
     </a>
 
-    <a href="/create-post">
-      <i class="fa-solid fa-plus text-xl"></i>
+    <a href="/create-post" class="hover:text-blue-400">
+      <i class="fa-solid fa-square-plus text-2xl"></i>
     </a>
 
-    <a href="/profile">
-      <div class="h-10 w-10 rounded-full overflow-hidden">
-        <img class="h-full w-full object-cover" src="/uploads/<%= user.profilePic %>" alt="">
+    <a href="/profile" class="hover:opacity-80">
+      <div class="h-9 w-9 rounded-full overflow-hidden border border-zinc-600">
+        <% if (user.profilePic) { %>
+          <img src="/uploads/<%= user.profilePic %>" class="h-full w-full object-cover">
+          <% } else { %>
+            <img src="/profile.jpg" class="h-full w-full object-cover">
+            <% } %>
       </div>
     </a>
+
   </footer>
 
-  <%- include("partials/footer") %>
+  <script>
+    const notification_container = document.getElementById("notification-container");
+
+    const notification = document.getElementById("notification");
+
+    const commentContainer = document.getElementById("comment-container");
+    const ccb = document.getElementById("comment-container-btn");
+
+    ccb.addEventListener("click", () => {
+      if (commentContainer.style.height === "0px" || !commentContainer.style.height) {
+        // expand to fit content
+        commentContainer.style.height = commentContainer.scrollHeight + "px";
+        ccb.textContent = "Hide comments";
+      } else {
+        // collapse
+        commentContainer.style.height = "0px";
+        ccb.textContent = "View comments";
+      }
+    });
+
+    // Initially hide notification bar
+    notification_container.style.display = "none";
+
+    const socket = io();
+
+    // Join correct room name
+    socket.emit("joinRoom", "<%= user._id.toString() %>");
+
+    socket.on("like-notification", (msg) => {
+      notification.innerText = msg;
+      notification_container.style.display = "block";
+      // Auto hide after 3 seconds
+      setTimeout(() => {
+        notification_container.style.display = "none";
+      }, 3000);
+    });
+
+    socket.on("follow-request-notification", (msg) => {
+      notification.innerText = msg
+      notification_container.style.display = "block"
+      setTimeout(() => {
+        notification_container.style.display = "none"
+      }, 3000)
+    })
+
+    socket.on("comment-notification", (msg) => {
+      notification.innerText = msg
+      notification_container.style.display = "block"
+      setTimeout(() => {
+        notification_container.style.display = "none"
+      }, 3000)
+    })
+  </script>
+
+</body>
+
+</html>

@@ -1,112 +1,160 @@
 <%- include("partials/header") %>
 
-  <section id="profile-section" class="w-full min-h-screen bg-zinc-900 text-white p-5">
+  <section id="profile-section" class="w-full min-h-screen bg-zinc-900 text-white pb-20">
 
-    <div class="header-container flex justify-between items-center">
-      <span class="text-2xl font-bold">
-        <%= user.name %>
-      </span>
-      <a href="/logout" class="bg-red-600 px-3 py-1 rounded hover:bg-red-400" type="button">Log Out</a>
+    <!-- TOP FOLDER -->
+    <div class="p-5">
+
+      <!-- USER HEADER -->
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold drop-shadow-md">
+          <%= user.name || user.username %>
+        </h1>
+        <a href="/logout" class="bg-red-600 px-4 py-1 rounded-lg hover:bg-red-500 transition">
+          Logout
+        </a>
+      </div>
+
+      <!-- PROFILE PIC + BIO -->
+      <div class="flex flex-col justify-center items-center gap-4">
+
+        <!-- PROFILE IMAGE -->
+        <div class="h-32 w-32 rounded-full border-4 border-zinc-700 overflow-hidden shadow-xl">
+          <% if (user.profilePic) { %>
+            <img src="/uploads/<%= user.profilePic %>" class="h-full w-full object-cover">
+            <% } else { %>
+              <img src="/profile.jpg" class="h-full w-full object-cover">
+              <% } %>
+        </div>
+
+        <!-- CHANGE PROFILE PIC -->
+        <form action="/upload-profile" method="POST" enctype="multipart/form-data">
+          <label class="bg-blue-600 px-4 py-1 rounded cursor-pointer hover:bg-blue-500 transition">
+            Change Photo
+            <input type="file" name="profilePic" class="hidden" onchange="this.form.submit()">
+          </label>
+        </form>
+
+        <div class="text-center">
+          <h2 class="text-xl font-semibold">
+            <%= user.username %>
+          </h2>
+          <p class="text-zinc-400 text-sm mt-1">
+            <%= user.bio || "No bio added" %>
+          </p>
+        </div>
+
+        <!-- STATS -->
+        <div class="flex gap-8 text-center mt-4">
+          <div>
+            <p class="text-2xl font-bold">
+              <%= user.posts.length %>
+            </p>
+            <p class="text-zinc-400 text-sm">Posts</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold">
+              <%= user.followers.length %>
+            </p>
+            <p class="text-zinc-400 text-sm">Followers</p>
+          </div>
+          <div>
+            <p class="text-2xl font-bold">
+              <%= user.following.length %>
+            </p>
+            <p class="text-zinc-400 text-sm">Following</p>
+          </div>
+        </div>
+
+        <!-- FOLLOW REQUESTS SECTION -->
+        <% if (user.pendingRequests.length> 0) { %>
+          <div class="mt-8 bg-zinc-800 p-4 rounded-xl w-full">
+            <h3 class="text-lg font-semibold mb-3">Follow Requests</h3>
+
+            <% user.pendingRequests.forEach(reqUser=> { %>
+              <div class="flex justify-between items-center bg-zinc-700 px-3 py-2 rounded-lg mb-2">
+
+                <span class="font-medium">
+                  <%= reqUser.username %>
+                </span>
+
+                <div class="flex gap-2">
+                  <!-- Accept Request -->
+                  <form action="/accept-follow-request/<%= reqUser._id %>" method="POST">
+                    <button class="bg-green-600 px-3 py-1 rounded hover:bg-green-500">
+                      Accept
+                    </button>
+                  </form>
+
+                  <!-- Reject Request -->
+                  <form action="/reject-follow-request/<%= reqUser._id %>" method="POST">
+                    <button class="bg-red-600 px-3 py-1 rounded hover:bg-red-500">
+                      Reject
+                    </button>
+                  </form>
+                </div>
+
+              </div>
+              <% }) %>
+          </div>
+          <% } %>
+
+            <!-- EDIT PROFILE -->
+            <a href="/edit-profile"
+              class="mt-4 bg-zinc-800 border border-zinc-600 px-6 py-2 rounded-lg hover:bg-zinc-700 transition">
+              Edit Profile
+            </a>
+
+      </div>
     </div>
 
-    <!-- TOP SECTION -->
-    <div id="upper" class="mt-10 w-full flex flex-col justify-center items-center h-[50%] gap-5">
+    <!-- POSTS GRID -->
+    <div class="px-4 grid grid-cols-3 gap-2 mt-6">
+      <% if(user.posts.length===0) { %>
+        <p class="text-center col-span-3 text-zinc-400">No posts yet</p>
+        <% } %>
 
-      <!-- PROFILE PICTURE -->
-      <div
-        class="border-4 border-zinc-700 h-28 w-28 rounded-full overflow-hidden shadow-lg flex items-center justify-center">
-        <% if (user.profilePic) { %>
-          <img class="h-full w-full object-cover" src="/uploads/<%= user.profilePic %>" alt="">
-          <% } else { %>
-            <img class="h-full w-full object-cover" src="../public/profile.jpg" alt="">
-            <% } %>
-      </div>
+          <% user.posts.forEach(post=> { %>
+            <div class="relative group h-40 rounded overflow-hidden">
 
-      <form action="/upload-profile" method="POST" enctype="multipart/form-data">
-        <label class="bg-blue-500 px-3 py-1 rounded cursor-pointer">
-          Update Profile Pic
-          <input type="file" name="profilePic" class="hidden" onchange="this.form.submit()">
-        </label>
-      </form>
+              <img src="/uploads/<%= post.postPic %>"
+                class="w-full h-full object-cover group-hover:opacity-70 transition">
 
-      <!-- NAME + BIO -->
-      <div class="text-center">
-        <h2 class="text-2xl font-semibold">
-          <%= user.username %>
-        </h2>
-        <p class="text-zinc-400">
-          <%= user.bio %>
-        </p>
-      </div>
+              <!-- DELETE POST BUTTON -->
+              <form action="/delete-post/<%= post._id %>" method="POST"
+                class="absolute top-1 right-1 hidden group-hover:flex">
+                <button class="bg-red-600 h-7 w-7 rounded-full flex items-center justify-center">
+                  <i class="fa-solid fa-xmark text-white text-sm"></i>
+                </button>
+              </form>
 
-      <!-- STATS -->
-      <div class="flex gap-8 text-center">
-        <div>
-          <span class="text-xl font-bold block">
-            <%= user.posts.length %>
-          </span>
-          <span class="text-sm text-zinc-400">Posts</span>
-        </div>
-        <div>
-          <span class="text-xl font-bold block">
-            <%= user.followeres.length %>
-          </span>
-          <span class="text-sm text-zinc-400">Followers</span>
-        </div>
-        <div>
-          <span class="text-xl font-bold block">
-            <%= user.following.length %>
-          </span>
-          <span class="text-sm text-zinc-400">Following</span>
-        </div>
-      </div>
-
-      <!-- EDIT PROFILE BUTTON -->
-      <a href="/edit-profile" class="px-5 py-2 bg-blue-500 rounded-lg text-white hover:bg-blue-600 transition">
-        Edit Profile
-      </a>
-
-    </div>
-
-    <!-- LOWER SECTION (POST GRID) -->
-    <div id="lower" class="mt-6 grid grid-cols-3 gap-2 p-2 mb-10">
-
-      <% user.posts.forEach((post)=> { %>
-
-        <div class="relative group h-40 rounded overflow-hidden">
-
-          <!-- POST IMAGE -->
-          <img class="w-full h-full object-cover" src="/uploads/<%= post.postPic %>" alt="">
-
-          <!-- DELETE BUTTON (SHOWS ON HOVER) -->
-          <form action="/delete-post/<%= post._id %>" method="POST"
-            class="absolute top-0 right-0">
-
-            <button class="h-8 w-8 bg-red-600 rounded-full flex items-center justify-center">
-              <i class="fa-solid fa-xmark text-white"></i>
-            </button>
-
-          </form>
-
-        </div>
-
-        <% }) %>
+            </div>
+            <% }) %>
     </div>
 
   </section>
 
-  <footer class="px-5 py-1 bg-zinc-700 text-white flex justify-between items-center fixed bottom-0 w-full">
-    <a href="/feed">
-      <i class="fa-solid fa-house text-xl"></i>
+  <!-- BOTTOM NAVBAR -->
+  <footer class="px-8 py-2 bg-zinc-950 text-white flex justify-between items-center fixed bottom-0 w-full">
+
+    <a href="/feed" class="hover:text-blue-400">
+      <i class="fa-solid fa-house text-2xl"></i>
     </a>
-    <a href="/create-post">
-      <i class="fa-solid fa-plus text-xl"></i>
+
+    <a href="/create-post" class="hover:text-blue-400">
+      <i class="fa-solid fa-square-plus text-2xl"></i>
     </a>
-    <a href="/profile">
-      <div class="h-8 w-8 rounded-full overflow-hidden">
-        <img class="h-full w-full object-cover" src="../uploads/<%= user.profilePic %>" alt="">
+
+    <a href="/profile" class="hover:opacity-80">
+      <div class="h-9 w-9 rounded-full overflow-hidden border border-zinc-600">
+        <% if (user.profilePic) { %>
+          <img src="/uploads/<%= user.profilePic %>" class="h-full w-full object-cover">
+          <% } else { %>
+            <img src="/profile.jpg" class="h-full w-full object-cover">
+            <% } %>
       </div>
     </a>
+
   </footer>
 
   <%- include("partials/footer") %>

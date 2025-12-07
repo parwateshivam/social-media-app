@@ -4,7 +4,11 @@ import {
   handleRegister,
   handleRegisterSubmit,
   handleLoginSubmit,
-  handleProfileUpload
+  handleProfileUpload,
+  handleEditProfileSubmit,
+  handleAcceptFollowRequest,
+  handleRejectFollowRequest,
+  handleFollowRequest
 } from '../controllers/authController.js'
 import { upload } from '../config/multerConfig.js'
 import { userModel } from '../models/userSchema.js'
@@ -30,8 +34,10 @@ authRouter.get("/logout", (req, res, next) => {
 
 // PROTECTED ROUTE INSIDE THIS FILE OR OUTSIDE
 authRouter.get("/profile", isLoggedIn, async (req, res) => {
-  let user = await userModel.findOne({ _id: req.user._id }).populate("posts")
-  res.render("profile.ejs", { user });
+  const user = await userModel.findById(req.user._id)
+    .populate("posts")
+    .populate("pendingRequests"); // ⭐️ Important
+  res.render("profile", { user });
 });
 
 
@@ -42,31 +48,12 @@ authRouter.get('/edit-profile', isLoggedIn, (req, res) => {
   res.render("edit", { user: req.user })
 })
 
-authRouter.post("/edit-profile-submit", isLoggedIn, async (req, res) => {
-  try {
-    const { username, bio } = req.body;
+authRouter.post("/edit-profile-submit", isLoggedIn, handleEditProfileSubmit);
 
-    // Check if username is taken by someone else
-    const existingUser = await userModel.findOne({ username });
+authRouter.post("/follow-request/:id", isLoggedIn, handleFollowRequest)
 
-    if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
-      return res.status(400).render("edit", { user: req.user, error: "Username already exists" });
-    }
+authRouter.post('/accept-follow-request/:id', isLoggedIn, handleAcceptFollowRequest)
 
-    let updatedUser = await userModel.findByIdAndUpdate(
-      req.user._id,
-      { username, bio },
-      { new: true }
-    );
-
-    await updatedUser.save()
-
-    res.redirect('/profile')
-
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send("Something went wrong");
-  }
-});
+authRouter.post('/reject-follow-request/:id', isLoggedIn, handleRejectFollowRequest)
 
 export { authRouter }

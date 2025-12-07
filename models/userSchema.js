@@ -5,7 +5,6 @@ const userSchema = new mongoose.Schema({
   email: String,
   name: String,
   password: String,
-  googleId: String,
   profilePic: String,
   bio: {
     type: String,
@@ -17,13 +16,25 @@ const userSchema = new mongoose.Schema({
       ref: "posts"
     }
   ],
-  followeres: [
+  followers: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "users"
     }
   ],
   following: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users"
+    }
+  ],
+  pendingRequests: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users"
+    }
+  ],
+  sentRequests: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "users"
